@@ -34,7 +34,7 @@ contract TokenSwapDelegate is Ownable, TokenSwapStorageV1 {
 
         IERC20(_token).safeTransferFrom(msg.sender, address(this), amount);
 
-        IERC20(destToken).safeTransferFrom(address(this), msg.sender, amount);
+        IERC20(destToken).safeTransfer(msg.sender, amount);
         
         emit Swap(msg.sender, _token, destToken, amount);
     }

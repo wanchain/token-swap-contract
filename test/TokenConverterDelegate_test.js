@@ -1,88 +1,66 @@
-const MetaCoin = artifacts.require("TokenSwapDelegate");
+const TokenSwapDelegate = artifacts.require("TokenSwapDelegate");
+const TokenSwapProxy = artifacts.require("TokenSwapProxy");
+const TestToken = artifacts.require("TestToken");
+const assert = require('assert');
+const Web3 = require('web3');
+
+
 
 contract("TokenSwapDelegate", accounts => {
-  // it("should put 10000 MetaCoin in the first account", () =>
-  //   MetaCoin.deployed()
-  //     .then(instance => instance.getBalance.call(accounts[0]))
-  //     .then(balance => {
-  //       assert.equal(
-  //         balance.valueOf(),
-  //         10000,
-  //         "10000 wasn't in the first account"
-  //       );
-  //     }));
+  it("proxy upgrade", async ()=>{
+    const tokenSwapDelegate1 = await TokenSwapDelegate.new();
+    const tokenSwapProxy = await TokenSwapProxy.new(tokenSwapDelegate1.address, accounts[1], "0x");
 
-  // it("should call a function that depends on a linked library", () => {
-  //   let meta;
-  //   let metaCoinBalance;
-  //   let metaCoinEthBalance;
+    const tokenSwapDelegate2 = await TokenSwapDelegate.new();
 
-  //   return MetaCoin.deployed()
-  //     .then(instance => {
-  //       meta = instance;
-  //       return meta.getBalance.call(accounts[0]);
-  //     })
-  //     .then(outCoinBalance => {
-  //       metaCoinBalance = outCoinBalance.toNumber();
-  //       return meta.getBalanceInEth.call(accounts[0]);
-  //     })
-  //     .then(outCoinBalanceEth => {
-  //       metaCoinEthBalance = outCoinBalanceEth.toNumber();
-  //     })
-  //     .then(() => {
-  //       assert.equal(
-  //         metaCoinEthBalance,
-  //         2 * metaCoinBalance,
-  //         "Library function returned unexpected function, linkage may be broken"
-  //       );
-  //     });
-  // });
+    await tokenSwapProxy.upgradeTo(tokenSwapDelegate2.address, {from: accounts[1]});
 
-  // it("should send coin correctly", () => {
-  //   let meta;
+    const tokenSwapDelegate3 = await TokenSwapDelegate.new();
 
-  //   // Get initial balances of first and second account.
-  //   const account_one = accounts[0];
-  //   const account_two = accounts[1];
+    await tokenSwapProxy.upgradeTo(tokenSwapDelegate3.address, {from: accounts[1]});
+  });
 
-  //   let account_one_starting_balance;
-  //   let account_two_starting_balance;
-  //   let account_one_ending_balance;
-  //   let account_two_ending_balance;
 
-  //   const amount = 10;
+  it("Test all", async () => {
 
-  //   return MetaCoin.deployed()
-  //     .then(instance => {
-  //       meta = instance;
-  //       return meta.getBalance.call(account_one);
-  //     })
-  //     .then(balance => {
-  //       account_one_starting_balance = balance.toNumber();
-  //       return meta.getBalance.call(account_two);
-  //     })
-  //     .then(balance => {
-  //       account_two_starting_balance = balance.toNumber();
-  //       return meta.sendCoin(account_two, amount, { from: account_one });
-  //     })
-  //     .then(() => meta.getBalance.call(account_one))
-  //     .then(balance => {
-  //       account_one_ending_balance = balance.toNumber();
-  //       return meta.getBalance.call(account_two);
-  //     })
-  //     .then(balance => {
-  //       account_two_ending_balance = balance.toNumber();
+    const tokenSwapDelegate = await TokenSwapDelegate.new();
+    
+    const token0 = await TestToken.new();
+    const token1 = await TestToken.new();
+    console.log('address:', token0.address, token1.address, tokenSwapDelegate.address);
 
-  //       assert.equal(
-  //         account_one_ending_balance,
-  //         account_one_starting_balance - amount,
-  //         "Amount wasn't correctly taken from the sender"
-  //       );
-  //       assert.equal(
-  //         account_two_ending_balance,
-  //         account_two_starting_balance + amount,
-  //         "Amount wasn't correctly sent to the receiver"
-  //       );
-  //     });
-  // });
+    await tokenSwapDelegate.config(token0.address, token1.address);
+
+    //Use delegate for test----------------
+
+    await token0.mint(accounts[1], 100000000);
+    await token1.mint(accounts[2], 100000000);
+    console.log('balance:', await token0.balanceOf(accounts[1]), await token0.balanceOf(accounts[2]), await token0.balanceOf(tokenSwapDelegate.address));
+
+    await token1.transfer(tokenSwapDelegate.address, 100000000, {from: accounts[2]});
+
+    console.log('balance:', await token0.balanceOf(accounts[1]), await token0.balanceOf(accounts[2]), await token0.balanceOf(tokenSwapDelegate.address));
+
+    await token0.approve(tokenSwapDelegate.address, "0xf000000000000000000000000000000", {from: accounts[1]});
+
+    console.log('allownce:', (await token0.allowance(accounts[1], tokenSwapDelegate.address)).toString());
+
+    await tokenSwapDelegate.swap(token0.address, 10000000, {from: accounts[1]});
+
+    console.log('balance:', await token0.balanceOf(accounts[1]), await token0.balanceOf(accounts[2]), await token0.balanceOf(tokenSwapDelegate.address));
+
+    await tokenSwapDelegate.swap(token0.address, 90000000, {from: accounts[1]});
+
+    console.log('balance:', await token0.balanceOf(accounts[1]), await token0.balanceOf(accounts[2]), await token0.balanceOf(tokenSwapDelegate.address));
+
+    try {
+
+      await tokenSwapDelegate.swap(token0.address, 90000000, {from: accounts[1]});
+
+      assert(false, 'Should never get here');
+    } catch (error) {
+      
+    }
+
+  });
 });
