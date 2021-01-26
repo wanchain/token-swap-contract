@@ -1,6 +1,6 @@
-const MetaCoin = artifacts.require("TokenConverterDelegate");
+const MetaCoin = artifacts.require("TokenSwapDelegate");
 
-contract("TokenConverterDelegate", accounts => {
+contract("TokenSwapDelegate", accounts => {
   // it("should put 10000 MetaCoin in the first account", () =>
   //   MetaCoin.deployed()
   //     .then(instance => instance.getBalance.call(accounts[0]))

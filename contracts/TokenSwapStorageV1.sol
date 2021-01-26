@@ -4,7 +4,7 @@ pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract TokenConverterStorageV1 {
+contract TokenSwapStorageV1 {
     using SafeMath for uint256;
 
     /**
@@ -15,3 +15,4 @@ contract TokenConverterStorageV1 {
     address public token1;
 
 }
+

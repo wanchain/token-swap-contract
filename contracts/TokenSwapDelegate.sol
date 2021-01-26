@@ -4,9 +4,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "./TokenConverterStorageV1.sol";
+import "./TokenSwapStorageV1.sol";
 
-contract TokenConverterDelegate is Ownable, TokenConverterStorageV1 {
+contract TokenSwapDelegate is Ownable, TokenSwapStorageV1 {
     using SafeERC20 for IERC20;
 
     event Swap(address indexed user, address tokenIn, address tokenOut, uint amount);
