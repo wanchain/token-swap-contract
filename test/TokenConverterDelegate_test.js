@@ -7,7 +7,7 @@ const Web3 = require('web3');
 
 
 contract("TokenSwapDelegate", accounts => {
-  it("proxy upgrade", async ()=>{
+  it("all", async ()=>{
     const tokenSwapDelegate1 = await TokenSwapDelegate.new();
     const tokenSwapProxy = await TokenSwapProxy.new(tokenSwapDelegate1.address, accounts[1], "0x");
 
@@ -21,18 +21,16 @@ contract("TokenSwapDelegate", accounts => {
     const tokenSwapDelegate3 = await TokenSwapDelegate.new();
 
     await tokenSwapProxy.upgradeTo(tokenSwapDelegate3.address, {from: accounts[2]});
-  });
 
+    let tokenSwapDelegate = await TokenSwapDelegate.at(tokenSwapProxy.address);
 
-  it("Test all", async () => {
-
-    const tokenSwapDelegate = await TokenSwapDelegate.new();
+    
     
     const token0 = await TestToken.new();
     const token1 = await TestToken.new();
     console.log('address:', token0.address, token1.address, tokenSwapDelegate.address);
 
-    await tokenSwapDelegate.config(token0.address, token1.address);
+    await tokenSwapDelegate.initialize(accounts[0], token0.address, token1.address);
 
     //Use delegate for test----------------
 

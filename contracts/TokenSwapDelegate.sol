@@ -4,9 +4,11 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./TokenSwapStorageV1.sol";
 
-contract TokenSwapDelegate is Ownable, TokenSwapStorageV1 {
+contract TokenSwapDelegate is Initializable, AccessControl, TokenSwapStorageV1 {
     using SafeERC20 for IERC20;
 
     event Swap(address indexed user, address tokenIn, address tokenOut, uint amount);
@@ -14,7 +16,8 @@ contract TokenSwapDelegate is Ownable, TokenSwapStorageV1 {
     /**
      * @dev token0 is owanBTC, token1 is wanBTC
      */
-    function config(address _token0, address _token1) public onlyOwner {
+    function initialize(address admin, address _token0, address _token1) public payable initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
         token0 = _token0;
         token1 = _token1;
     }
