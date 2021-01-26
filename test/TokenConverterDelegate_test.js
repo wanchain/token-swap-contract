@@ -11,13 +11,16 @@ contract("TokenSwapDelegate", accounts => {
     const tokenSwapDelegate1 = await TokenSwapDelegate.new();
     const tokenSwapProxy = await TokenSwapProxy.new(tokenSwapDelegate1.address, accounts[1], "0x");
 
+
     const tokenSwapDelegate2 = await TokenSwapDelegate.new();
 
     await tokenSwapProxy.upgradeTo(tokenSwapDelegate2.address, {from: accounts[1]});
 
+    await tokenSwapProxy.changeAdmin(accounts[2], {from: accounts[1]});
+
     const tokenSwapDelegate3 = await TokenSwapDelegate.new();
 
-    await tokenSwapProxy.upgradeTo(tokenSwapDelegate3.address, {from: accounts[1]});
+    await tokenSwapProxy.upgradeTo(tokenSwapDelegate3.address, {from: accounts[2]});
   });
 
 
